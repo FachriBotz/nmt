@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SECTOR-7 | Apocalypse Roleplay Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'orbitron': ['Orbitron', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'apocalypse': {
+                            900: '#0a0a0f',
+                            800: '#12121a',
+                            700: '#1a1a2e',
+                            600: '#252540',
+                            500: '#e94560',
+                            400: '#ff6b6b',
+                            300: '#ffd93d',
+                            accent: '#00d4ff',
+                            success: '#00ff88',
+                            warning: '#ff9500',
+                        }
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'glitch': 'glitch 1s linear infinite',
+                        'scan': 'scan 4s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        glitch: {
+                            '0%, 100%': { transform: 'translate(0)' },
+                            '20%': { transform: 'translate(-2px, 2px)' },
+                            '40%': { transform: 'translate(-2px, -2px)' },
+                            '60%': { transform: 'translate(2px, 2px)' },
+                            '80%': { transform: 'translate(2px, -2px)' },
+                        },
+                        scan: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100%)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0a0a0f;
+            color: #e0e0e0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .glass-panel {
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(233, 69, 96, 0.15);
+            border-color: rgba(233, 69, 96, 0.3);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #e94560, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .cyber-grid {
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .status-dot {
+            animation: blink 2s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.03;
+            z-index: 9999;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+        
+        .tab-active {
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.2), rgba(255, 107, 107, 0.1));
+            border: 1px solid rgba(233, 69, 96, 0.4);
+            color: #ff6b6b;
+        }
+        
+        .hazard-stripe {
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(233, 69, 96, 0.1) 10px,
+                rgba(233, 69, 96, 0.1) 20px
+            );
+        }
+    </style>
+</head>
+<body class="cyber-grid min-h-screen relative">
+
+    <!-- Noise Overlay -->
+    <div class="noise-overlay"></div>
+
+    <!-- Mobile Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-white/10 md:hidden">
+        <div class="flex justify-around items-center py-3 px-4">
+            <button onclick="switchTab('feed')" class="nav-btn flex flex-col items-center gap-1 text-apocalypse-500" data-tab="feed">
+                <i class="fas fa-rss text-xl"></i>
+                <span class="text-[10px] font-medium">Feed</span>
+            </button>
+            <button onclick="switchTab('factions')" class="nav-btn flex flex-col items-center gap-1 text-gray-500 hover:text-apocalypse-accent transition-colors" data-tab="factions">
+                <i class="fas fa-shield-alt text-xl"></i>
+                <span class="text-[10px] font-medium">Faksi</span>
+            </button>
+            <button onclick="switchTab('survivors')" class="nav-btn flex flex-col items-center gap-1 text-gray-500 hover:text-apocalypse-accent transition-colors" data-tab="survivors">
+                <i class="fas fa-users text-xl"></i>
+                <span class="text-[10px] font-medium">Survivor</span>
+            </button>
+            <button onclick="switchTab('zones')" class="nav-btn flex flex-col items-center gap-1 text-gray-500 hover:text-apocalypse-accent transition-colors" data-tab="zones">
+                <i class="fas fa-map-marked-alt text-xl"></i>
+                <span class="text-[10px] font-medium">Zona</span>
+            </button>
+            <button onclick="switchTab('profile')" class="nav-btn flex flex-col items-center gap-1 text-gray-500 hover:text-apocalypse-accent transition-colors" data-tab="profile">
+                <i class="fas fa-user-circle text-xl"></i>
+                <span class="text-[10px] font-medium">Profil</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Desktop Sidebar -->
+    <aside class="fixed left-0 top-0 h-full w-64 glass-panel border-r border-white/10 hidden md:flex flex-col z-40">
+        <div class="p-6 border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-apocalypse-500 to-apocalypse-400 flex items-center justify-center">
+                    <i class="fas fa-biohazard text-white text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-orbitron font-bold text-lg text-white tracking-wider">SECTOR-7</h1>
+                    <p class="text-[10px] text-apocalypse-500 font-mono">SYS.ONLINE // v2.4.1</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 py-6 px-4 space-y-2">
+            <button onclick="switchTab('feed')" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-apocalypse-500 bg-apocalypse-500/10 border border-apocalypse-500/20 transition-all" data-tab="feed">
+                <i class="fas fa-rss"></i>
+                <span class="font-medium">News Feed</span>
+                <span class="ml-auto bg-apocalypse-500 text-white text-[10px] px-2 py-0.5 rounded-full">3</span>
+            </button>
+            <button onclick="switchTab('factions')" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all" data-tab="factions">
+                <i class="fas fa-shield-alt"></i>
+                <span class="font-medium">Faksi</span>
+            </button>
+            <button onclick="switchTab('survivors')" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all" data-tab="survivors">
+                <i class="fas fa-users"></i>
+                <span class="font-medium">Survivor</span>
+                <span class="ml-auto bg-apocalypse-accent/20 text-apocalypse-accent text-[10px] px-2 py-0.5 rounded-full">LIVE</span>
+            </button>
+            <button onclick="switchTab('zones')" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all" data-tab="zones">
+                <i class="fas fa-map-marked-alt"></i>
+                <span class="font-medium">Zona Bahaya</span>
+            </button>
+            <button onclick="switchTab('inventory')" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 hover:bg-white/5 hover:text-white transition-all" data-tab="inventory">
+                <i class="fas fa-box-open"></i>
+                <span class="font-medium">Inventori</span>
+            </button>
+        </div>
+
+        <div class="p-4 border-t border-white/10">
+            <button onclick="switchTab('profile')" class="sidebar-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-all" data-tab="profile">
+                <img src="https://i.pravatar.cc/150?img=11" class="w-10 h-10 rounded-full border-2 border-apocalypse-500" alt="Avatar">
+                <div class="text-left">
+                    <p class="text-sm font-medium text-white">Commander Vex</p>
+                    <p class="text-[10px] text-gray-500">Level 47 • Survivor</p>
+                </div>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="md:ml-64 pb-20 md:pb-0 min-h-screen">
+        
+        <!-- Header -->
+        <header class="sticky top-0 z-30 glass-panel border-b border-white/10 px-4 md:px-8 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <h2 id="page-title" class="font-orbitron text-xl md:text-2xl font-bold text-white">News Feed</h2>
+                <span class="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-apocalypse-500/10 border border-apocalypse-500/20 text-apocalypse-500 text-xs">
+                    <span class="w-2 h-2 rounded-full bg-apocalypse-500 status-dot"></span>
+                    Server Online
+                </span>
+            </div>
+            <div class="flex items-center gap-3">
+                <button class="relative p-2 rounded-xl hover:bg-white/5 transition-colors">
+                    <i class="fas fa-bell text-gray-400 text-lg"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-apocalypse-500 rounded-full status-dot"></span>
+                </button>
+                <button class="p-2 rounded-xl hover:bg-white/5 transition-colors">
+                    <i class="fas fa-search text-gray-400 text-lg"></i>
+                </button>
+                <button class="hidden md:flex p-2 rounded-xl hover:bg-white/5 transition-colors">
+                    <i class="fas fa-cog text-gray-400 text-lg"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="p-4 md:p-8 max-w-7xl mx-auto">
+
+            <!-- TAB: NEWS FEED -->
+            <div id="tab-feed" class="tab-content space-y-6">
+                <!-- Hero Banner -->
+                <div class="relative rounded-2xl overflow-hidden h-48 md:h-64 card-hover group cursor-pointer">
+                    <div class="absolute inset-0 bg-gradient-to-r from-apocalypse-900 via-apocalypse-800 to-transparent z-10"></div>
+                    <img src="https://images.unsplash.com/photo-1542259681-d4cd3839e4ae?w=800&h=400&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" alt="Apocalypse City">
+                    <div class="absolute inset-0 z-20 p-6 md:p-8 flex flex-col justify-end">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="px-2 py-1 rounded bg-apocalypse-500 text-white text-[10px] font-bold uppercase tracking-wider">URGENT</span>
+                            <span class="text-apocalypse-300 text-xs font-mono">2 jam yang lalu</span>
+                        </div>
+                        <h3 class="font-orbitron text-xl md:text-3xl font-bold text-white mb-2">ZONA KONTAMINASI BARU TERDETEKSI</h3>
+                        <p class="text-gray-300 text-sm md:text-base max-w-xl">Sektor 12 telah diklasifikasikan sebagai Zona Merah. Semua survivor diminta untuk mengungsi ke bunker terdekat segera.</p>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                    <div class="glass-panel rounded-xl p-4 border border-white/5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-lg bg-apocalypse-500/20 flex items-center justify-center">
+                                <i class="fas fa-skull text-apocalypse-500 text-sm"></i>
+                            </div>
+                            <span class="text-gray-400 text-xs">Infected</span>
+                        </div>
+                        <p class="text-2xl font-orbitron font-bold text-white">2,847</p>
+                        <p class="text-[10px] text-apocalypse-500 mt-1">↑ 12% dari kemarin</p>
+                    </div>
+                    <div class="glass-panel rounded-xl p-4 border border-white/5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-lg bg-apocalypse-accent/20 flex items-center justify-center">
+                                <i class="fas fa-heartbeat text-apocalypse-accent text-sm"></i>
+                            </div>
+                            <span class="text-gray-400 text-xs">Survivor</span>
+                        </div>
+                        <p class="text-2xl font-orbitron font-bold text-white">1,203</p>
+                        <p class="text-[10px] text-apocalypse-success mt-1">↑ 3% dari kemarin</p>
+                    </div>
+                    <div class="glass-panel rounded-xl p-4 border border-white/5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-lg bg-apocalypse-warning/20 flex items-center justify-center">
+                                <i class="fas fa-radiation text-apocalypse-warning text-sm"></i>
+                            </div>
+                            <span class="text-gray-400 text-xs">Radiasi</span>
+                        </div>
+                        <p class="text-2xl font-orbitron font-bold text-white">HIGH</p>
+                        <p class="text-[10px] text-apocalypse-warning mt-1">Zona 7 & 12</p>
+                    </div>
+                    <div class="glass-panel rounded-xl p-4 border border-white/5">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                                <i class="fas fa-clock text-purple-400 text-sm"></i>
+                            </div>
+                            <span class="text-gray-400 text-xs">D-Day</span>
+                        </div>
+                        <p class="text-2xl font-orbitron font-bold text-white">487</p>
+                        <p class="text-[10px] text-gray-400 mt-1">Hari sejak Outbreak</p>
+                    </div>
+                </div>
+
+                <!-- Live Activity -->
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-orbitron font-bold text-white flex items-center gap-2">
+                            <span class="w-2 h-2 bg-red-500 rounded-full status-dot"></span>
+                            Aktivitas Langsung
+                        </h3>
+                        <button class="text-apocalypse-accent text-xs hover:underline">Lihat Semua</button>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="glass-panel rounded-xl p-4 card-hover cursor-pointer border border-white/5">
+                            <div class="flex items-start gap-4">
+                                <div class="relative">
+                                    <img src="https://i.pravatar.cc/150?img=33" class="w-12 h-12 rounded-xl object-cover" alt="User">
+                                    <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-apocalypse-success rounded-full border-2 border-apocalypse-800"></span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <h4 class="font-bold text-white">Dr. Elena Voss</h4>
+                                        <span class="text-[10px] text-gray-500 font-mono">14:32</span>
+                                    </div>
+                                    <p class="text-sm text-gray-300 mb-2">Menemukan stash medis di <span class="text-apocalypse-accent">Rumah Sakit Abandoned</span>. Stok obat-obatan langka tersedia untuk trade.</p>
+                                    <div class="flex items-center gap-4 text-xs text-gray-500">
+                                        <span class="flex items-center gap-1"><i class="fas fa-map-marker-alt text-apocalypse-500"></i> Zona 4</span>
+                                        <span class="flex items-center gap-1"><i class="fas fa-comment"></i> 12</span>
+                                        <span class="flex items-center gap-1"><i class="fas fa-heart text-apocalypse-500"></i> 48</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-xl p-4 card-hover cursor-pointer border border-white/5">
+                            <div class="flex items-start gap-4">
+                                <div class="relative">
+                                    <img src="https://i.pravatar.cc/150?img=59" class="w-12 h-12 rounded-xl object-cover" alt="User">
+                                    <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-apocalypse-warning rounded-full border-2 border-apocalypse-800"></span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <h4 class="font-bold text-white">Marcus "Ironhand" Kole</h4>
+                                        <span class="text-[10px] text-gray-500 font-mono">13:15</span>
+                                    </div>
+                                    <p class="text-sm text-gray-300 mb-2">Squad kami berhasil clear <span class="text-apocalypse-500">Horde Level 3</span> di jalan raya utama. Butuh backup untuk looting supplies.</p>
+                                    <div class="flex items-center gap-4 text-xs text-gray-500">
+                                        <span class="flex items-center gap-1"><i class="fas fa-map-marker-alt text-apocalypse-500"></i> Highway 95</span>
+                                        <span class="flex items-center gap-1"><i class="fas fa-comment"></i> 8</span>
+                                        <span class="flex items-center gap-1"><i class="fas fa-heart text-apocalypse-500"></i> 124</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-panel rounded-xl p-4 card-hover cursor-pointer border border-white/5">
+                            <div class="flex items-start gap-4">
+                                <div class="relative">
+                                    <img src="https://i.pravatar.cc/150?img=68" class="w-12 h-12 rounded-xl object-cover" alt="User">
+                                    <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-gray-500 rounded-full border-2 border-apocalypse-800"></span>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <h4 class="font-bold text-white">Sarah Chen</h4>
+                                        <span class="text-[10px] text-gray-500 font-mono">11:45</span>
+                                    </div>
+                                    <p class="text-sm text-gray-300 mb-2">Update peta: Jembatan Selatan <span class="text-apocalypse-warning">COLLAPSED</span>. Rute alternatif melalui terowongan kereta.</p>
+                                    <div class="flex items-center gap-4 text-xs text-gray-500">
+                                        <span class="flex items-center gap-1"><i class="fas fa-map-marker-alt text-apocalypse-500"></i> South Bridge</span>
+                                        <span class="flex items-center gap-1"><i class="fas fa-comment"></i> 34</span>
+                                        <span class="flex items-center gap-1"><i class="fas fa-heart text-apocalypse-500"></i> 89</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: FACTIONS -->
+            <div id="tab-factions" class="tab-content hidden space-y-6">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-gray-400 text-sm">Pilih faksi untuk melihat detail dan bergabung dengan komunitas survivor.</p>
+                    <button class="px-4 py-2 rounded-xl bg-apocalypse-500 text-white text-sm font-medium hover:bg-apocalypse-400 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Buat Faksi
+                    </button>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Faction Card 1 -->
+                    <div class="glass-panel rounded-2xl overflow-hidden card-hover border border-white/5 group">
+                        <div class="h-32 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-br from-red-900/80 to-orange-900/80"></div>
+                            <img src="https://images.unsplash.com/photo-1605806616949-1e87b487bc2a?w=400&h=200&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay" alt="Faction">
+                            <div class="absolute inset-0 p-4 flex flex-col justify-end">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center border border-white/20">
+                                            <i class="fas fa-fire text-orange-400 text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-orbitron font-bold text-white">Phoenix Rising</h3>
+                                            <p class="text-[10px] text-orange-300">Militant • 234 Members</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-1 rounded bg-orange-500/20 text-orange-400 text-[10px] border border-orange-500/30">Tier S</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-sm text-gray-400 mb-3">Faksi militer yang fokus pada pertahanan teritori dan eradication infected. Memiliki base di Sector 3.</p>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-gray-300 border border-white/10">Combat</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-gray-300 border border-white/10">Defense</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-gray-300 border border-white/10">Raid</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex -space-x-2">
+                                    <img src="https://i.pravatar.cc/150?img=1" class="w-6 h-6 rounded-full border-2 border-apocalypse-800" alt="Member">
+                                    <img src="https://i.pravatar.cc/150?img=2" class="w-6 h-6 rounded-full border-2 border-apocalypse-800" alt="Member">
+                                    <img src="https://i.pravatar.cc/150?img=3" class="w-6 h-6 rounded-full border-2 border-apocalypse-800" alt="Member">
+                                    <div class="w-6 h-6 rounded-full border-2 border-apocalypse-800 bg-apocalypse-700 flex items-center justify-center text-[8px] text-white">+231</div>
+                                </div>
+                                <button class="px-4 py-2 rounded-lg bg-orange-500/20 text-orange-400 text-sm font-medium hover:bg-orange-500/30 transition-colors border border-orange-500/30">
+                                    Join
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Faction Card 2 -->
+                    <div class="glass-panel rounded-2xl overflow-hidden card-hover border border-white/5 group">
+                        <div class="h-32 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-br from-blue-900/80 to-cyan-900/80"></div>
+                            <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=200&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay" alt="Faction">
+                            <div class="absolute inset-0 p-4 flex flex-col justify-end">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center border border-white/20">
+                                            <i class="fas fa-flask text-apocalypse-accent text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-orbitron font-bold text-white">The Archivists</h3>
+                                            <p class="text-[10px] text-apocalypse-accent">Scientific • 156 Members</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-1 rounded bg-apocalypse-accent/20 text-apocalypse-accent text-[10px] border border-apocalypse-accent/30">Tier A</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-sm text-gray-400 mb-3">Peneliti dan ilmuwan yang berusaha mencari cure. Memiliki lab rahasia di bawah kota.</p>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-gray-300 border border-white/10">Research</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-gray-300 border border-white/10">Medical</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-gray-300 border border-white/10">Tech</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex -space-x-2">
+                                    <img src="https://i.pravatar.cc/150?img=4" class="w-6 h-6 rounded-full border-2 border-apocalypse-800" alt="Member">
+                                    <img src="https://i.pravatar.cc/150?img=5" class="w-6 h-6 rounded-full border-2 border-apocalypse-800" alt="Member">
+                                    <img src="https://i.pravatar.cc/150?img=6" class="w-6 h-6 rounded-full border-2 border-apocalypse-800" alt="Member">
+                                    <div class="w-6 h-6 rounded-full border-2 border-apocalypse-800 bg-apocalypse-700 flex items-center justify-center text-[8px] text-white">+153</div>
+                                </div>
+                                <button class="px-4 py-2 rounded-lg bg-apocalypse-accent/20 text-apocalypse-accent text-sm font-medium hover:bg-apocalypse-accent/30 transition-colors border border-apocalypse-accent/30">
+                                    Join
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Faction Card 3 -->
+                    <div class="glass-panel rounded-2xl overflow-hidden card-hover border border-white/5 group">
+                        <div class="h-32 relative overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-br from-green-900/80 to-emerald-900/80"></div>
+                            <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&h=200&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay" alt="Faction">
+                            <div class="absolute inset-0 p-4 flex flex-col justify-end">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center border border-white/20">
+                                            <i class="fas fa-leaf text-green-400 text-lg"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-orbitron font-bold text-white">Green Haven</h3>
+                                            <p class="text-[10px] text-green-400">Survivalist • 89 Members</p>
+                                        </div>
+                                    </div>
+                                    <span class="px-2 py-1 rounded bg-green-500/20 text-green-400 text-[10px] border border-green-500/30">Tier B</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <p class="text-sm text-gray-400 mb-3">Komunitas yang fokus pada sustainable living dan farming. Ahli dalam bertahan hidup di alam liar.</p>
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-gray-300 border border-white/10">Farming</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-gray-300 border border-white/10">Crafting</span>
+                                <span class="px-2 py-1 rounded-md bg-white/5 text-[10px] text-gray-300 border border-white/10">Trade</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex -space-x-2">
+                                    <img src="https://i.pravatar.cc/150?img=7" class="w-6 h-6 rounded-full border-2 border-apocalypse-800" alt="Member">
+                                    <img src="https://i.pravatar.cc/150?img=8" class="w-6 h-6 rounded-full border-2 border-apocalypse-800" alt="Member">
+                                    <img src="https://i.pravatar.cc/150?img=9" class="w-6 h-6 rounded-full border-2 border-apocalypse-800" alt="Member">
+                                    <div class="w-6 h-6 rounded-full border-2 border-apocalypse-800 bg-apocalypse-700 flex items-center justify-center text-[8px] text-white">+86</div>
+                                </div>
+                                <button class="px-4 py-2 rounded-lg bg-green-500/20 text-green-400 text-sm font-medium hover:bg-green-500/30 transition-colors border border-green-500/30">
+                                    Join
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: SURVIVORS -->
+            <div id="tab-survivors" class="tab-content hidden space-y-6">
+                <div class="glass-panel rounded-2xl p-6 border border-white/5">
+                    <div class="flex flex-col md:flex-row items-center gap-6">
+                        <div class="relative">
+                            <img src="https://i.pravatar.cc/150?img=11" class="w-24 h-24 rounded-2xl object-cover border-2 border-apocalypse-500" alt="Profile">
+                            <div class="absolute -bottom-2 -right-2 w-8 h-8 rounded-lg bg-apocalypse-500 flex items-center justify-center text-white text-xs font-bold">47</div>
+                        </div>
+                        <div class="flex-1 text-center md:text-left">
+                            <h3 class="font-orbitron text-2xl font-bold text-white mb-1">Commander Vex</h3>
+                            <p class="text-apocalypse-500 text-sm mb-3">Faction Leader • Phoenix Rising</p>
+                            <div class="flex flex-wrap justify-center md:justify-start gap-2">
+                                <span class="px-3 py-1 rounded-full bg-apocalypse-500/10 border border-apocalypse-500/20 text-apocalypse-500 text-xs">
+                                    <i class="fas fa-crosshairs mr-1"></i>Combat: 92
+                                </span>
+                                <span class="px-3 py-1 rounded-full bg-apocalypse-accent/10 border border-apocalypse-accent/20 text-apocalypse-accent text-xs">
+                                    <i class="fas fa-brain mr-1"></i>Intel: 78
+                                </span>
+                                <span class="px-3 py-1 rounded-full bg-apocalypse-success/10 border border-apocalypse-success/20 text-apocalypse-success text-xs">
+                                    <i class="fas fa-heart mr-1"></i>Survival: 85
+                                </span>
+                                <span class="px-3 py-1 rounded-full bg-apocalypse-warning/10 border border-apocalypse-warning/20 text-apocalypse-warning text-xs">
+                                    <i class="fas fa-handshake mr-1"></i>Leadership: 96
+                                </span>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="px-4 py-2 rounded-xl bg-apocalypse-500 text-white text-sm hover:bg-apocalypse-400 transition-colors">
+                                <i class="fas fa-edit mr-2"></i>Edit
+                            </button>
+                            <button class="px-4 py-2 rounded-xl bg-white/5 text-white text-sm hover:bg-white/10 transition-colors border border-white/10">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Chart -->
+                <div class="glass-panel rounded-2xl p-6 border border-white/5">
+                    <h3 class="font-orbitron font-bold text-white mb-4">Statistik 7 Hari Terakhir</h3>
+                    <div class="h-48 flex items-end justify-between gap-2 px-2">
+                        <div class="flex-1 flex flex-col items-center gap-2">
+                            <div class="w-full bg-gradient-to-t from-apocalypse-500 to-apocalypse-400 rounded-t-lg relative group cursor-pointer" style="height: 65%">
+                                <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-apocalypse-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap border border-white/10">65 Aktivitas</div>
+                            </div>
+                            <span class="text-[10px] text-gray-500">Sen</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-2">
+                            <div class="w-full bg-gradient-to-t from-apocalypse-500 to-apocalypse-400 rounded-t-lg relative group cursor-pointer" style="height: 45%"></div>
+                            <span class="text-[10px] text-gray-500">Sel</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-2">
+                            <div class="w-full bg-gradient-to-t from-apocalypse-500 to-apocalypse-400 rounded-t-lg relative group cursor-pointer" style="height: 80%"></div>
+                            <span class="text-[10px] text-gray-500">Rab</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-2">
+                            <div class="w-full bg-gradient-to-t from-apocalypse-500 to-apocalypse-400 rounded-t-lg relative group cursor-pointer" style="height: 55%"></div>
+                            <span class="text-[10px] text-gray-500">Kam</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-2">
+                            <div class="w-full bg-gradient-to-t from-apocalypse-500 to-apocalypse-400 rounded-t-lg relative group cursor-pointer" style="height: 90%"></div>
+                            <span class="text-[10px] text-gray-500">Jum</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-2">
+                            <div class="w-full bg-gradient-to-t from-apocalypse-500 to-apocalypse-400 rounded-t-lg relative group cursor-pointer" style="height: 40%"></div>
+                            <span class="text-[10px] text-gray-500">Sab</span>
+                        </div>
+                        <div class="flex-1 flex flex-col items-center gap-2">
+                            <div class="w-full bg-gradient-to-t from-apocalypse-500 to-apocalypse-400 rounded-t-lg relative group cursor-pointer" style="height: 75%"></div>
+                            <span class="text-[10px] text-gray-500">Min</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Missions -->
+                <div>
+                    <h3 class="font-orbitron font-bold text-white mb-4">Misi Terbaru</h3>
+                    <div class="space-y-3">
+                        <div class="glass-panel rounded-xl p-4 flex items-center gap-4 border border-white/5 card-hover cursor-pointer">
+                            <div class="w-12 h-12 rounded-xl bg-apocalypse-500/20 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-check-circle text-apocalypse-500 text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-white text-sm">Clear Infected Hospital</h4>
+                                <p class="text-xs text-gray-500 mt-1">Selesai • 2 jam yang lalu • +450 XP</p>
+                            </div>
+                            <span class="text-apocalypse-success text-sm font-bold">+450 XP</span>
+                        </div>
+                        <div class="glass-panel rounded-xl p-4 flex items-center gap-4 border border-white/5 card-hover cursor-pointer">
+                            <div class="w-12 h-12 rounded-xl bg-apocalypse-warning/20 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-clock text-apocalypse-warning text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-white text-sm">Supply Run: Sector 9</h4>
+                                <p class="text-xs text-gray-500 mt-1">Dalam Progress • 45% Complete</p>
+                            </div>
+                            <div class="w-20 h-2 bg-apocalypse-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-apocalypse-warning rounded-full" style="width: 45%"></div>
+                            </div>
+                        </div>
+                        <div class="glass-panel rounded-xl p-4 flex items-center gap-4 border border-white/5 card-hover cursor-pointer">
+                            <div class="w-12 h-12 rounded-xl bg-apocalypse-accent/20 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-lock text-apocalypse-accent text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-bold text-white text-sm">Bunker Defense Protocol</h4>
+                                <p class="text-xs text-gray-500 mt-1">Locked • Butuh Level 50</p>
+                            </div>
+                            <span class="text-gray-500 text-xs"><i class="fas fa-lock mr-1"></i>Locked</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: ZONES -->
+            <div id="tab-zones" class="tab-content hidden space-y-6">
+                <div class="glass-panel rounded-2xl p-4 border border-white/5 overflow-hidden">
+                    <div class="relative h-64 md:h-96 rounded-xl overflow-hidden bg-apocalypse-800">
+                        <!-- Simulated Map -->
+                        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&h=600&fit=crop')] bg-cover bg-center opacity-30"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-apocalypse-900 via-transparent to-transparent"></div>
+                        
+                        <!-- Zone Markers -->
+                        <div class="absolute top-[20%] left-[30%] group cursor-pointer">
+                            <div class="w-4 h-4 bg-red-500 rounded-full status-dot relative">
+                                <div class="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-75"></div>
+                            </div>
+                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-apocalypse-800 border border-red-500/30 rounded text-[10px] text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                                Zona Merah • High Radiation
+                            </div>
+                        </div>
+                        
+                        <div class="absolute top-[40%] left-[60%] group cursor-pointer">
+                            <div class="w-4 h-4 bg-apocalypse-warning rounded-full relative">
+                                <div class="absolute inset-0 bg-apocalypse-warning rounded-full animate-pulse opacity-75"></div>
+                            </div>
+                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-apocalypse-800 border border-apocalypse-warning/30 rounded text-[10px] text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                                Zona Kuning • Moderate Risk
+                            </div>
+                        </div>
+                        
+                        <div class="absolute top-[60%] left-[45%] group cursor-pointer">
+                            <div class="w-4 h-4 bg-apocalypse-success rounded-full"></div>
+                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-apocalypse-800 border border-apocalypse-success/30 rounded text-[10px] text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                                Safe Zone • Bunker Alpha
+                            </div>
+                        </div>
+
+                        <div class="absolute bottom-4 left-4 right-4">
+                            <div class="glass-panel rounded-xl p-4 border border-white/10">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-orbitron font-bold text-white">Peta Interaktif</h4>
+                                    <span class="text-[10px] text-apocalypse-accent font-mono">LIVE UPDATE</span>
+                                </div>
+                                <div class="flex gap-4 text-xs">
+                                    <span class="flex items-center gap-1"><span class="w-2 h-2 bg-red-500 rounded-full"></span> Zona Merah</span>
+                                    <span class="flex items-center gap-1"><span class="w-2 h-2 bg-apocalypse-warning rounded-full"></span> Zona Kuning</span>
+                                    <span class="flex items-center gap-1"><span class="w-2 h-2 bg-apocalypse-success rounded-full"></span> Safe Zone</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="glass-panel rounded-xl p-4 border border-red-500/20 hazard-stripe">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-bold text-red-400 flex items-center gap-2">
+                                <i class="fas fa-radiation"></i>
+                                Zona Merah: Sector 12
+                            </h4>
+                            <span class="px-2 py-1 bg-red-500/20 text-red-400 text-[10px] rounded border border-red-500/30">DANGER</span>
+                        </div>
+                        <p class="text-sm text-gray-400 mb-3">Tingkat radiasi tinggi. Infected density level extreme. Tidak disarankan untuk masuk tanpa hazmat suit tier 3.</p>
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-gray-500">Last updated: 5 menit lalu</span>
+                            <button class="text-red-400 hover:text-red-300">Lihat Detail →</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-4 border border-apocalypse-warning/20">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-bold text-apocalypse-warning flex items-center gap-2">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Zona Kuning: Highway 95
+                            </h4>
+                            <span class="px-2 py-1 bg-apocalypse-warning/20 text-apocalypse-warning text-[10px] rounded border border-apocalypse-warning/30">CAUTION</span>
+                        </div>
+                        <p class="text-sm text-gray-400 mb-3">Jalur utama dengan infected patrol. Loot crates tersedia tapi butuh stealth approach. Recommended: Squad 3+.</p>
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-gray-500">Last updated: 12 menit lalu</span>
+                            <button class="text-apocalypse-warning hover:text-yellow-300">Lihat Detail →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: INVENTORY -->
+            <div id="tab-inventory" class="tab-content hidden space-y-6">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-gray-400 text-sm">Kelola equipment, supplies, dan resources Anda.</p>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-2 rounded-lg bg-white/5 text-gray-300 text-sm hover:bg-white/10 transition-colors border border-white/10">
+                            <i class="fas fa-filter mr-2"></i>Filter
+                        </button>
+                        <button class="px-3 py-2 rounded-lg bg-apocalypse-500 text-white text-sm hover:bg-apocalypse-400 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Tambah
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <!-- Item Cards -->
+                    <div class="glass-panel rounded-xl p-3 border border-white/5 card-hover cursor-pointer group relative overflow-hidden">
+                        <div class="aspect-square rounded-lg bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center mb-2 relative overflow-hidden">
+                            <i class="fas fa-gun text-3xl text-gray-400 group-hover:text-apocalypse-accent transition-colors"></i>
+                            <div class="absolute top-1 right-1 px-1.5 py-0.5 bg-apocalypse-500 text-white text-[8px] rounded">RARE</div>
+                        </div>
+                        <h4 class="text-sm font-bold text-white truncate">Assault Rifle M4A1</h4>
+                        <p class="text-[10px] text-gray-500">Weapon • 120 Ammo</p>
+                        <div class="mt-2 flex items-center justify-between">
+                            <div class="w-16 h-1 bg-apocalypse-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-apocalypse-accent rounded-full" style="width: 85%"></div>
+                            </div>
+                            <span class="text-[10px] text-apocalypse-accent">85%</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 border border-white/5 card-hover cursor-pointer group relative overflow-hidden">
+                        <div class="aspect-square rounded-lg bg-gradient-to-br from-red-900/50 to-red-800/50 flex items-center justify-center mb-2 relative overflow-hidden">
+                            <i class="fas fa-first-aid text-3xl text-red-400 group-hover:scale-110 transition-transform"></i>
+                            <div class="absolute top-1 right-1 px-1.5 py-0.5 bg-red-500 text-white text-[8px] rounded">MED</div>
+                        </div>
+                        <h4 class="text-sm font-bold text-white truncate">Medkit Advanced</h4>
+                        <p class="text-[10px] text-gray-500">Medical • x3</p>
+                        <div class="mt-2 flex items-center justify-between">
+                            <span class="text-[10px] text-gray-400">Heal: +75 HP</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 border border-white/5 card-hover cursor-pointer group relative overflow-hidden">
+                        <div class="aspect-square rounded-lg bg-gradient-to-br from-yellow-900/50 to-yellow-800/50 flex items-center justify-center mb-2 relative overflow-hidden">
+                            <i class="fas fa-bread-slice text-3xl text-yellow-400 group-hover:scale-110 transition-transform"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-white truncate">MRE Ration</h4>
+                        <p class="text-[10px] text-gray-500">Food • x12</p>
+                        <div class="mt-2 flex items-center justify-between">
+                            <span class="text-[10px] text-gray-400">Hunger: -30%</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 border border-white/5 card-hover cursor-pointer group relative overflow-hidden">
+                        <div class="aspect-square rounded-lg bg-gradient-to-br from-blue-900/50 to-blue-800/50 flex items-center justify-center mb-2 relative overflow-hidden">
+                            <i class="fas fa-shield-alt text-3xl text-blue-400 group-hover:text-apocalypse-accent transition-colors"></i>
+                            <div class="absolute top-1 right-1 px-1.5 py-0.5 bg-blue-500 text-white text-[8px] rounded">ARMOR</div>
+                        </div>
+                        <h4 class="text-sm font-bold text-white truncate">Tactical Vest</h4>
+                        <p class="text-[10px] text-gray-500">Armor • Level 2</p>
+                        <div class="mt-2 flex items-center justify-between">
+                            <div class="w-16 h-1 bg-apocalypse-800 rounded-full overflow-hidden">
+                                <div class="h-full bg-blue-400 rounded-full" style="width: 60%"></div>
+                            </div>
+                            <span class="text-[10px] text-blue-400">60%</span>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-3 border border-white/5 card-hover cursor-pointer group relative overflow-hidden">
+                        <div class="aspect-square rounded-lg bg-gradient-to-br from-purple-900/50 to-purple-800/50 flex items-center justify-center mb-2 relative overflow-hidden">
+                            <i class="fas fa-flask text-3xl text-purple-400 group-hover:scale-110 transition-transform"></i>
+                            <div class="absolute top-1 right-1 px-1.5 py-0.5 bg-purple-500 text-white text-[10px] rounded">QUEST</div>
+                        </div>
+                        <h4 class="text-sm font-bold text-white truncate">Virus Sample</h4>
+                        <p class="text-[10px] text-gray-500">Quest Item</p>
+                        <div class="mt-2 flex items-center justify-between">
+                            <span class="text-[10px] text-purple-400">For: The Archivists</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: PROFILE -->
+            <div id="tab-profile" class="tab-content hidden space-y-6">
+                <div class="glass-panel rounded-2xl overflow-hidden border border-white/5">
+                    <div class="h-32 bg-gradient-to-r from-apocalypse-500 via-purple-600 to-apocalypse-accent relative">
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-30"></div>
+                    </div>
+                    <div class="px-6 pb-6 relative">
+                        <div class="flex flex-col md:flex-row items-end md:items-center -mt-12 mb-4 gap-4">
+                            <img src="https://i.pravatar.cc/150?img=11" class="w-24 h-24 rounded-2xl border-4 border-apocalypse-800 object-cover" alt="Profile">
+                            <div class="flex-1 mb-1">
+                                <h2 class="font-orbitron text-2xl font-bold text-white">Commander Vex</h2>
+                                <p class="text-gray-400 text-sm">"Survive first, ask questions later."</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="px-4 py-2 rounded-xl bg-apocalypse-500 text-white text-sm font-medium hover:bg-apocalypse-400 transition-colors">
+                                    <i class="fas fa-user-edit mr-2"></i>Edit Profil
+                                </button>
+                                <button class="px-4 py-2 rounded-xl bg-white/5 text-white text-sm border border-white/10 hover:bg-white/10 transition-colors">
+                                    <i class="fas fa-cog"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 mb-6">
+                            <div class="text-center p-3 rounded-xl bg-white/5 border border-white/5">
+                                <p class="text-2xl font-orbitron font-bold text-apocalypse-500">47</p>
+                                <p class="text-[10px] text-gray-500 uppercase tracking-wider">Level</p>
+                            </div>
+                            <div class="text-center p-3 rounded-xl bg-white/5 border border-white/5">
+                                <p class="text-2xl font-orbitron font-bold text-apocalypse-accent">12.4k</p>
+                                <p class="text-[10px] text-gray-500 uppercase tracking-wider">Reputation</p>
+                            </div>
+                            <div class="text-center p-3 rounded-xl bg-white/5 border border-white/5">
+                                <p class="text-2xl font-orbitron font-bold text-apocalypse-success">89</p>
+                                <p class="text-[10px] text-gray-500 uppercase tracking-wider">Missions</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">XP Progress</span>
+                                    <span class="text-apocalypse-500">8,450 / 10,000</span>
+                                </div>
+                                <div class="h-2 bg-apocalypse-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-apocalypse-500 to-apocalypse-400 rounded-full" style="width: 84.5%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Health</span>
+                                    <span class="text-red-400">85 / 100</span>
+                                </div>
+                                <div class="h-2 bg-apocalypse-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Stamina</span>
+                                    <span class="text-apocalypse-warning">60 / 100</span>
+                                </div>
+                                <div class="h-2 bg-apocalypse-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-yellow-600 to-yellow-400 rounded-full" style="width: 60%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs mb-1">
+                                    <span class="text-gray-400">Hunger</span>
+                                    <span class="text-apocalypse-success">90 / 100</span>
+                                </div>
+                                <div class="h-2 bg-apocalypse-800 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-green-600 to-green-400 rounded-full" style="width: 90%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Tab Switching Logic
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            
+            // Show selected tab
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            
+            // Update navigation active states
+            document.querySelectorAll('.nav-btn, .sidebar-btn').forEach(btn => {
+                const isActive = btn.dataset.tab === tabName;
+                if (btn.classList.contains('nav-btn')) {
+                    // Mobile nav styling
+                    if (isActive) {
+                        btn.classList.remove('text-gray-500');
+                        btn.classList.add('text-apocalypse-500');
+                    } else {
+                        btn.classList.remove('text-apocalypse-500');
+                        btn.classList.add('text-gray-500');
+                    }
+                } else {
+                    // Desktop sidebar styling
+                    if (isActive) {
+                        btn.classList.remove('text-gray-400', 'hover:bg-white/5', 'hover:text-white');
+                        btn.classList.add('text-apocalypse-500', 'bg-apocalypse-500/10', 'border', 'border-apocalypse-500/20');
+                    } else {
+                        btn.classList.remove('text-apocalypse-500', 'bg-apocalypse-500/10', 'border', 'border-apocalypse-500/20');
+                        btn.classList.add('text-gray-400', 'hover:bg-white/5', 'hover:text-white');
+                    }
+                }
+            });
+            
+            // Update page title
+            const titles = {
+                'feed': 'News Feed',
+                'factions': 'Faksi Survivor',
+                'survivors': 'Profil Survivor',
+                'zones': 'Zona Bahaya',
+                'inventory': 'Inventori',
+                'profile': 'Profil Saya'
+            };
+            document.getElementById('page-title').textContent = titles[tabName] || 'Sector-7';
+        }
+
+        // Initialize first tab
+        switchTab('feed');
+
+        // Add click interactions for cards
+        document.querySelectorAll('.card-hover').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // Simulate live updates
+        setInterval(() => {
+            const dots = document.querySelectorAll('.status-dot');
+            dots.forEach(dot => {
+                dot.style.opacity = Math.random() > 0.5 ? '1' : '0.3';
+            });
+        }, 2000);
+    </script>
+</body>
+</html>
